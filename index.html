@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Interactive Banker's Algorithm Simulator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Banker's Algorithm</title>
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -13,99 +14,115 @@
             min-height: 100vh;
         }
 
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap');
+
         h1 {
             text-align: center;
             color: #2c3e50;
-            margin-bottom: 30px;
-            font-size: 2.5em;
+            margin-bottom: 40px;
+            font-size: 3em;
             text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+            font-family: 'Roboto', sans-serif; /* Updated font */
         }
 
-        .container {
-            display: flex;
-            gap: 25px;
-            margin-bottom: 25px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .matrix-section {
+        .section {
             background: white;
             border-radius: 15px;
             padding: 25px;
+            margin-bottom: 25px;
             box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-            flex: 1;
-            min-width: 320px;
             transition: transform 0.3s ease;
         }
 
-        .matrix-section:hover {
+        .section:hover {
             transform: translateY(-5px);
         }
 
-        .setup-section {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin-bottom: 25px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-
-        h3 {
+        h2 {
             color: #34495e;
             border-bottom: 2px solid #3498db;
             padding-bottom: 10px;
             margin-bottom: 20px;
+            font-size: 1.8em;
         }
 
-        table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            margin: 15px 0;
+        p {
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #2c3e50;
+        }
+
+        .highlight-term {
+            color: #3498db;
+            text-decoration: underline;
+            cursor: pointer;
+            position: relative;
+            display: inline-block;
+            margin-right: 20px; /* space between terms */
+        }
+
+        /* Adjust the layout of the popups */
+        .popup-container {
+            display: flex;
+            flex-direction: row;
+            gap: 20px; /* spacing between each popup */
+            margin-top: 8px;
+        }
+
+        .popup {
+            visibility: hidden;
+            position: absolute;
+            left: 100%;
+            top: 0;
+            background-color: #ffffff;
+            padding: 11px;
             border-radius: 8px;
-            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            width: 350px;
+            z-index: 10;
+            opacity: 0;
+            transition: visibility 0.3s ease-in-out, opacity 0.3s ease-in-out;
         }
 
-        th, td {
-            border: 1px solid #e0e0e0;
-            padding: 12px;
+        .highlight-term:hover .popup {
+            visibility: visible;
+            opacity: 1;
+        }
+
+        .popup img {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+
+        .popup-content {
+            font-size: 1em;
+        }
+
+        .image-container {
             text-align: center;
-            transition: background-color 0.3s ease;
+            margin-top: 30px;
         }
 
-        th {
-            background: #3498db;
-            color: white;
-            font-weight: 500;
-        }
-
-        input[type="number"] {
-            width: 70px;
-            padding: 8px;
-            text-align: center;
-            border: 2px solid #e0e0e0;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-
-        input[type="number"]:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 5px rgba(52,152,219,0.3);
-            outline: none;
+        .image-container img {
+            width: 100%;
+            max-width: 700px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
 
         .btn {
-            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-            color: white;
-            border: none;
+            display: block;
+            width: fit-content;
+            margin: 40px auto;
             padding: 12px 25px;
             border-radius: 8px;
-            cursor: pointer;
-            margin: 15px 0;
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         .btn:hover {
@@ -113,456 +130,165 @@
             box-shadow: 0 6px 8px rgba(0,0,0,0.15);
         }
 
-        .safe {
-            background-color: #d4edda;
-            animation: safePulse 2s infinite;
-        }
+        /* For mobile responsiveness */
+        @media (max-width: 768px) {
+            .section {
+                padding: 20px;
+            }
 
-        .wait {
-            background-color: #f8d7da;
-            animation: waitPulse 2s infinite;
-        }
+            h1 {
+                font-size: 2.5em;
+            }
 
-        @keyframes safePulse {
-            0% { background-color: #d4edda; }
-            50% { background-color: #c3e6cb; }
-            100% { background-color: #d4edda; }
-        }
+            .popup {
+                width: 250px;
+            }
 
-        @keyframes waitPulse {
-            0% { background-color: #f8d7da; }
-            50% { background-color: #f5c6cb; }
-            100% { background-color: #f8d7da; }
-        }
-
-        .process-blocks {
-            display: flex;
-            gap: 25px;
-            margin-top: 25px;
-        }
-
-        .safe-block, .wait-block {
-            flex: 1;
-            padding: 20px;
-            border-radius: 12px;
-            min-height: 120px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-
-        .safe-block {
-            background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-            border: none;
-        }
-
-        .wait-block {
-            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
-            border: none;
-        }
-
-        .execution-log {
-            margin-top: 25px;
-            padding: 20px;
-            background: white;
-            border-radius: 12px;
-            border: none;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-        }
-
-        .execution-log p {
-            margin: 8px 0;
-            padding: 8px;
-            border-radius: 6px;
-            background: #f8f9fa;
-        }
-
-        .cell-safe {
-            background-color: #d4edda;
-            animation: safePulse 2s infinite;
-        }
-        
-        .cell-wait {
-            background-color: #f8d7da;
-            animation: waitPulse 2s infinite;
-        }
-        
-        @keyframes slideIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
+            .image-container img {
+                width: 90%;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Interactive Banker's Algorithm Simulator</h1>
-    
-    <div class="setup-section">
-        <h2>System Configuration</h2>
-        <div>
-            <label>Number of Processes: 
-                <input type="number" id="processCount" min="1" max="10" value="3">
-            </label>
-            <label style="margin-left: 20px;">Number of Resources: 
-                <input type="number" id="resourceCount" min="1" max="5" value="3">
-            </label>
-            <button class="btn" onclick="initializeSystem()">Initialize System</button>
+    <h1>Banker's Algorithm</h1>
+
+    <!-- Section 1: What is Banker's Algorithm -->
+    <div class="section">
+        <h2>What is Banker's Algorithm?</h2>
+            <div class="popup">
+                <div class="popup-content">
+                    <h3>Banker's Algorithm</h3>
+                    <p>The Banker's Algorithm is used to check the safety of resource allocation and prevent deadlocks in operating systems.</p>
+                    <img src="bankers_algorithm_overview.png" alt="Banker's Algorithm Overview">
+                </div>
+            </div>
+        </span></span>The Banker's Algorithm is a resource allocation and deadlock avoidance algorithm used in operating systems to prevent resource deadlocks. It determines whether granting a resource request will keep the system in a safe state.</p>
+        <p>The algorithm operates by simulating resource allocation and ensuring that at least one sequence of process execution is possible without leading to a deadlock.</p>
+        <div class="image-container">
+            <img src="flowchart.png" alt="Banker's Algorithm Flowchart">
         </div>
     </div>
 
-    <div id="matricesContainer" style="display:none;">
-        <div class="container">
-            <div class="matrix-section">
-                <h3>Initial Resources</h3>
-                <table id="initialResourcesTable"></table>
-            </div>
+    <!-- Section 2: Data Structures -->
+    <div class="section">
+        <h2>Data Structures in Banker's Algorithm</h2>
+        <p>The Banker's Algorithm maintains a set of data structures to decide whether to grant a resource request or not. Below are the key components:</p>
+        <div class="image-container">
+            <img src="datastructure.png" alt="Banker's Algorithm Data Structures">
         </div>
-
-        <div class="container">
-            <div class="matrix-section">
-                <h3>Maximum Matrix</h3>
-                <table id="maximumMatrixTable"></table>
-            </div>
-
-            <div class="matrix-section">
-                <h3>Allocation Matrix</h3>
-                <table id="allocationMatrixTable"></table>
-            </div>
-        </div>
-
-        <button class="btn" onclick="calculateNeedMatrix()">Calculate Need Matrix</button>
-
-        <div class="container">
-            <div class="matrix-section">
-                <h3>Need Matrix</h3>
-                <table id="needMatrixTable"></table>
-            </div>
-
-            <div class="matrix-section">
-                <h3>Available Resources</h3>
-                <table id="availableResourcesTable"></table>
-            </div>
-        </div>
-
-        <div style="text-align: center; margin: 20px 0;">
-            <button class="btn" id="startExecutionBtn" style="display: none;" onclick="startAutomaticExecution()">
-                Start Execution
-            </button>
-        </div>
-
-        <div class="process-blocks">
-            <div class="safe-block">
-                <h3>Safe Processes</h3>
-                <div id="safeProcesses"></div>
-            </div>
-            <div class="wait-block">
-                <h3>Waiting Processes</h3>
-                <div id="waitingProcesses"></div>
-            </div>
-        </div>
-
-        <div class="execution-log">
-            <h3>Execution Log</h3>
-            <div id="executionLog"></div>
-        </div>
-
-        <div id="executionStatus"></div>
+        <ul>
+            <li><span class="highlight-term">Available Resources Array
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Available Resources Array</h3>
+                            <p><b>Definition:</b> The "Available Resources Array" is a collection that tracks the number of available instances for each resource type in the system. It tells the Banker's Algorithm how many resources are currently free and can be allocated to processes.</p>
+                            <p><b>Purpose:</b> It helps in determining if a resource request can be granted by comparing the requested resources with the available resources.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">Maximum Matrix
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Maximum Matrix</h3>
+                            <p><b>Definition:</b> The "Maximum Matrix" defines the maximum demand for each resource by each process. It shows the highest number of resources a process may need to complete its execution.</p>
+                            <p><b>Purpose:</b>It is used to ensure that the system never allocates more resources to a process than it needs, helping to avoid deadlocks.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">Allocation Matrix
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Allocation Matrix</h3>
+                            <p><b>Definition:</b> The "Allocation Matrix" holds the number of instances of each resource type that are currently allocated to each process.</p>
+                            <p><b>Purpose:</b> It is used to track the current usage of resources by each process and is required to calculate the "Need Matrix."</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">Need Matrix
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Need Matrix</h3>
+                            <p><b>Definition:</b> The "Need Matrix" is calculated by subtracting the "Allocation Matrix" from the "Maximum Matrix." It shows the remaining resources each process requires to complete its execution.</p>
+                            <p><b>Purpose: </b>It helps the Banker's Algorithm determine if a process can finish with the current available resources, and whether granting a request would leave the system in a safe state.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+        </ul>
     </div>
 
-    <script>
-        let processCount, resourceCount;
-        let initialResources, maximumMatrix, allocationMatrix;
-        let needMatrix, availableResources;
-        let safeSequence = [];
-        let executedProcesses = new Set();
-        let waitingProcesses = new Set();
+    <!-- Section 3: What is Deadlock -->
+    <div class="section">
+        <h2>What is Deadlock?</h2>
+        <p>Deadlock is a state in which a set of processes are blocked because each process is holding a resource and waiting for another resource acquired by another process. </p>
+        <div class="image-container">
+            <img src="deadlock.png" alt="Deadlock Conditions">
+        </div>
+        <p>The conditions for deadlock are:</p>
+        <ul>
+            <li><span class="highlight-term">Mutual Exclusion
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Mutual Exclusion</h3>
+                            <p><b>Definition: </b>The Mutual Exclusion condition implies that a resource can only be held by one process at a time. No two processes can share the same resource simultaneously. If a process is holding a resource, no other process can access it until it is released.</p>
+                            <p><b>Importance in Deadlock: </b>This condition is necessary for deadlock to occur because if resources were shared, deadlock could not happen. Each resource must be exclusive to a single process.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">Hold and Wait
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Hold and Wait</h3>
+                            <p><b>Definition:</b> The Hold and Wait condition occurs when a process is holding one or more resources and is waiting to acquire additional resources that are currently held by other processes.</p>
+                            <p><b>Importance in Deadlock:</b> This condition creates a situation where a process may hold a resource and block others from obtaining the resources they need to complete their tasks, potentially leading to a circular wait, which is a necessary condition for deadlock.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">No Preemption
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>No Preemption</h3>
+                            <p><b>Definition: </b>The No Preemption condition states that once a process has been allocated a resource, the operating system cannot forcibly take it away from the process, even if other processes are waiting for that resource.</p>
+                            <p><b>Importance in Deadlock:</b>If resources cannot be preempted, it becomes possible for processes to hold resources indefinitely while waiting for other resources, causing a potential deadlock situation.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+            <li><span class="highlight-term">Circular Wait
+                <div class="popup-container">
+                    <div class="popup">
+                        <div class="popup-content">
+                            <h3>Circular Wait</h3>
+                            <p><b>Definition: </b>The Circular Wait condition exists when a set of processes are each waiting for a resource that is held by another process in the set, forming a circular chain of waiting processes. Each process in the circle is waiting for a resource held by the next process, creating a deadlock.</p>
+                            <p><b>Importance in Deadlock: </b>This condition is the final piece that completes the deadlock scenario. If a circular wait exists, deadlock is inevitable because each process is blocked and unable to release the resources it holds to resolve the wait.</p>
+                        </div>
+                    </div>
+                </div>
+            </span></li>
+        </ul>
+        <p>To avoid deadlocks, operating systems use algorithms like the Banker's Algorithm, resource ordering, or timeout-based handling mechanisms.</p>
+    </div>
 
-        function initializeSystem() {
-            processCount = parseInt(document.getElementById('processCount').value);
-            resourceCount = parseInt(document.getElementById('resourceCount').value);
+    <!-- Section 4: How the Simulator Works -->
+    <div class="section">
+        <h2>How the Banker's Algorithm Simulator Works</h2>
+        <p>The Banker's Algorithm Simulator helps visualize how processes and resources interact to avoid deadlock. After entering the number of processes and resources, the simulator generates resource matrices and calculates the Need Matrix and Available Resources. It checks if processes can safely execute based on available resources, marking them as safe or waiting. If at least one of the process is in waiting state for infinite time it means there is a deadlock.. The simulation tracks progress through an execution log, using color-coded visuals to indicate safe or waiting processes, demonstrating how the Banker's Algorithm ensures deadlock-free execution.</p>
+    </div>
 
-            // Initialize Initial Resources Table
-            const initialResourcesTable = document.getElementById('initialResourcesTable');
-            initialResourcesTable.innerHTML = '<tr>' + 
-                Array.from({length: resourceCount}, (_, j) => 
-                    `<th>Resource ${j+1}</th>`
-                ).join('') + '</tr><tr>' +
-                Array.from({length: resourceCount}, () => 
-                    `<td><input type="number" min="0" value="0"></td>`
-                ).join('') + '</tr>';
-
-            // Initialize Maximum Matrix
-            const maximumMatrixTable = document.getElementById('maximumMatrixTable');
-            maximumMatrixTable.innerHTML = '<tr><th>Process</th>' + 
-                Array.from({length: resourceCount}, (_, j) => 
-                    `<th>Resource ${j+1}</th>`
-                ).join('') + '</tr>' +
-                Array.from({length: processCount}, (_, i) => 
-                    `<tr><td>P${i}</td>` +
-                    Array.from({length: resourceCount}, () => 
-                        `<td><input type="number" min="0" value="0"></td>`
-                    ).join('') + '</tr>'
-                ).join('');
-
-            // Initialize Allocation Matrix
-            const allocationMatrixTable = document.getElementById('allocationMatrixTable');
-            allocationMatrixTable.innerHTML = '<tr><th>Process</th>' + 
-                Array.from({length: resourceCount}, (_, j) => 
-                    `<th>Resource ${j+1}</th>`
-                ).join('') + '</tr>' +
-                Array.from({length: processCount}, (_, i) => 
-                    `<tr><td>P${i}</td>` +
-                    Array.from({length: resourceCount}, () => 
-                        `<td><input type="number" min="0" value="0"></td>`
-                    ).join('') + '</tr>'
-                ).join('');
-
-            document.getElementById('matricesContainer').style.display = 'block';
-            
-            // Don't initialize waiting processes here
-            executedProcesses.clear();
-            waitingProcesses.clear();
-            safeSequence = [];
-            updateProcessBlocks();
-        }
-
-        function calculateNeedMatrix() {
-            // Collect matrices data
-            initialResources = Array.from(
-                document.querySelectorAll('#initialResourcesTable input')
-            ).map(input => parseInt(input.value));
-
-            maximumMatrix = Array.from(
-                document.querySelectorAll('#maximumMatrixTable tr:not(:first-child)')
-            ).map(row => 
-                Array.from(row.querySelectorAll('input')).map(input => parseInt(input.value))
-            );
-
-            allocationMatrix = Array.from(
-                document.querySelectorAll('#allocationMatrixTable tr:not(:first-child)')
-            ).map(row => 
-                Array.from(row.querySelectorAll('input')).map(input => parseInt(input.value))
-            );
-
-            // Calculate Need Matrix
-            needMatrix = maximumMatrix.map((row, i) => 
-                row.map((max, j) => max - allocationMatrix[i][j])
-            );
-
-            // Calculate Available Resources correctly
-            availableResources = initialResources.map((total, j) => {
-                const allocated = allocationMatrix.reduce((sum, row) => sum + row[j], 0);
-                return total - allocated;
-            });
-
-            // Display matrices
-            displayNeedMatrix();
-            displayAvailableResources();
-            checkSafeCells(); // Just clear any existing highlighting
-            
-            // Show the Start Execution button
-            document.getElementById('startExecutionBtn').style.display = 'inline-block';
-            
-            // Clear previous execution state
-            executedProcesses.clear();
-            waitingProcesses.clear();
-            safeSequence = [];
-            updateProcessBlocks();
-            
-            // Clear execution log
-            document.getElementById('executionLog').innerHTML = '';
-        }
-
-        function displayNeedMatrix() {
-            const needMatrixTable = document.getElementById('needMatrixTable');
-            needMatrixTable.innerHTML = '<tr><th>Process</th>' + 
-                Array.from({length: resourceCount}, (_, j) => 
-                    `<th>Resource ${j+1}</th>`
-                ).join('') + '</tr>' +
-                needMatrix.map((row, i) => 
-                    `<tr><td>P${i}</td>` +
-                    row.map((need, j) => 
-                        `<td class="need-cell" data-process="${i}" data-resource="${j}">${need}</td>`
-                    ).join('') + '</tr>'
-                ).join('');
-            
-            checkSafeCells();
-        }
-
-        function checkSafeCells() {
-            // Clear all previous highlighting
-            const needCells = document.querySelectorAll('.need-cell');
-            needCells.forEach(cell => {
-                cell.classList.remove('cell-safe', 'cell-wait');
-            });
-        }
-
-        function displayAvailableResources() {
-            const availableResourcesTable = document.getElementById('availableResourcesTable');
-            availableResourcesTable.innerHTML = '<tr>' + 
-                Array.from({length: resourceCount}, (_, j) => 
-                    `<th>Resource ${j+1}</th>`
-                ).join('') + '</tr><tr>' +
-                availableResources.map(res => `<td>${res}</td>`).join('') + '</tr>';
-        }
-
-        function startAutomaticExecution() {
-            // Disable the button during execution
-            document.getElementById('startExecutionBtn').disabled = true;
-            document.getElementById('startExecutionBtn').textContent = 'Execution in Progress...';
-            
-            // Start execution from P0
-            executeProcessesAutomatically(0).then(() => {
-                // Re-enable the button after execution is complete
-                document.getElementById('startExecutionBtn').disabled = false;
-                document.getElementById('startExecutionBtn').textContent = 'Start Execution';
-            });
-        }
-
-        async function executeProcessesAutomatically(currentProcess) {
-            if (currentProcess >= processCount) {
-                // Check if there are any processes still waiting
-                if (waitingProcesses.size > 0) {
-                    logExecution('DEADLOCK DETECTED: Following processes cannot be executed: ' + 
-                        Array.from(waitingProcesses).map(p => 'P' + p).join(', '));
-                    highlightAllCellsRed();
-                    document.getElementById('startExecutionBtn').textContent = 'Execution Complete (Deadlock)';
-                    return;
-                } else {
-                    logExecution(`Execution Complete! Safe Sequence: ${safeSequence.map(p => 'P' + p).join(' → ')}`);
-                    document.getElementById('startExecutionBtn').textContent = 'Execution Complete';
-                }
-                return;
-            }
-
-            // First, check waiting processes
-            await checkWaitingProcesses();
-
-            // Then try to execute current process
-            const row = document.querySelector(`#needMatrixTable tr:nth-child(${currentProcess + 2})`);
-            const cells = row.querySelectorAll('.need-cell');
-            
-            // Highlight cells based on resource availability
-            cells.forEach((cell, j) => {
-                const need = needMatrix[currentProcess][j];
-                if (need <= availableResources[j]) {
-                    cell.classList.add('cell-safe');
-                    cell.classList.remove('cell-wait');
-                } else {
-                    cell.classList.add('cell-wait');
-                    cell.classList.remove('cell-safe');
-                }
-            });
-
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            // Check if process can be executed
-            const canExecute = needMatrix[currentProcess].every((need, j) => need <= availableResources[j]);
-
-            if (canExecute) {
-                // Execute process
-                executedProcesses.add(currentProcess);
-                safeSequence.push(currentProcess);
-
-                // Release resources
-                allocationMatrix[currentProcess].forEach((allocated, j) => {
-                    availableResources[j] += allocated;
-                });
-
-                logExecution(currentProcess);
-                displayAvailableResources();
-                updateProcessBlocks();
-                
-                await new Promise(resolve => setTimeout(resolve, 3000));
-            } else {
-                // Only add to waiting if it can't be executed
-                waitingProcesses.add(currentProcess);
-                updateProcessBlocks();
-                logExecution(`Process P${currentProcess} must wait`);
-            }
-
-            // Move to next process
-            await executeProcessesAutomatically(currentProcess + 1);
-        }
-
-        async function checkWaitingProcesses() {
-            let executedWaiting = false;
-            
-            do {
-                executedWaiting = false;
-                for (let waitingProcess of waitingProcesses) {
-                    const canExecute = needMatrix[waitingProcess].every((need, j) => need <= availableResources[j]);
-                    
-                    if (canExecute) {
-                        // Highlight cells before execution
-                        const row = document.querySelector(`#needMatrixTable tr:nth-child(${waitingProcess + 2})`);
-                        const cells = row.querySelectorAll('.need-cell');
-                        cells.forEach(cell => {
-                            cell.classList.add('cell-safe');
-                            cell.classList.remove('cell-wait');
-                        });
-
-                        // Increased delay to 3 seconds
-                        await new Promise(resolve => setTimeout(resolve, 3000));
-
-                        // Execute waiting process
-                        executedProcesses.add(waitingProcess);
-                        waitingProcesses.delete(waitingProcess);
-                        safeSequence.push(waitingProcess);
-
-                        // Release resources
-                        allocationMatrix[waitingProcess].forEach((allocated, j) => {
-                            availableResources[j] += allocated;
-                        });
-
-                        logExecution(`Waiting process P${waitingProcess} now executed`);
-                        displayAvailableResources();
-                        updateProcessBlocks();
-                        
-                        executedWaiting = true;
-                        // Increased delay to 3 seconds
-                        await new Promise(resolve => setTimeout(resolve, 3000));
-                        break;
-                    }
-                }
-            } while (executedWaiting && waitingProcesses.size > 0);
-        }
-
-        // Add this new function for deadlock visualization
-        function highlightAllCellsRed() {
-            const allCells = document.querySelectorAll('.need-cell');
-            allCells.forEach(cell => {
-                cell.classList.add('cell-wait');
-                cell.classList.remove('cell-safe');
-            });
-        }
-
-        // Update the log function to make deadlock messages more informative
-        function logExecution(message) {
-            const log = document.getElementById('executionLog');
-            const logEntry = document.createElement('p');
-            
-            if (typeof message === 'number') {
-                logEntry.innerHTML = `Executed P${message}. Available Resources: [${availableResources.join(', ')}]`;
-            } else {
-                if (message.includes('DEADLOCK')) {
-                    logEntry.style.color = 'red';
-                    logEntry.style.fontWeight = 'bold';
-                    logEntry.style.backgroundColor = '#ffe6e6'; // Light red background
-                    logEntry.style.padding = '10px';
-                    logEntry.style.borderRadius = '5px';
-                }
-                logEntry.innerHTML = message;
-            }
-            
-            logEntry.style.animation = 'slideIn 0.5s ease';
-            log.insertBefore(logEntry, log.firstChild);
-        }
-
-        function updateProcessBlocks() {
-            document.getElementById('safeProcesses').innerHTML = 
-                Array.from(executedProcesses).map(i => `P${i}`).join(' → ') || 'None';
-            document.getElementById('waitingProcesses').innerHTML = 
-                Array.from(waitingProcesses).map(i => `P${i}`).join(', ') || 'None';
-        }
-    </script>
+    <!-- Button to Go to the Simulator -->
+    <a href="bankers.html" class="btn">Go to Banker's Algorithm Simulator</a>
 </body>
 </html>
