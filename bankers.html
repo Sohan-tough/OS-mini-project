@@ -286,7 +286,7 @@
                     `<th>Resource ${j+1}</th>`
                 ).join('') + '</tr><tr>' +
                 Array.from({length: resourceCount}, () => 
-                    `<td><input type="number" min="0" value="0"></td>`
+                    `<td><input type="number" min="0" value="0" onchange="validateInput(this)"></td>`
                 ).join('') + '</tr>';
 
             // Initialize Maximum Matrix
@@ -298,7 +298,7 @@
                 Array.from({length: processCount}, (_, i) => 
                     `<tr><td>P${i}</td>` +
                     Array.from({length: resourceCount}, () => 
-                        `<td><input type="number" min="0" value="0"></td>`
+                        `<td><input type="number" min="0" value="0" onchange="validateInput(this)"></td>`
                     ).join('') + '</tr>'
                 ).join('');
 
@@ -311,7 +311,7 @@
                 Array.from({length: processCount}, (_, i) => 
                     `<tr><td>P${i}</td>` +
                     Array.from({length: resourceCount}, () => 
-                        `<td><input type="number" min="0" value="0"></td>`
+                        `<td><input type="number" min="0" value="0" onchange="validateInput(this)"></td>`
                     ).join('') + '</tr>'
                 ).join('');
 
@@ -341,6 +341,50 @@
             ).map(row => 
                 Array.from(row.querySelectorAll('input')).map(input => parseInt(input.value))
             );
+
+            // Validate for negative values and constraints
+            let hasError = false;
+            let errorMessage = '';
+
+            // Check for negative values
+            if (initialResources.some(val => val < 0)) {
+                hasError = true;
+                errorMessage += 'Initial resources cannot be negative.\n';
+            }
+
+            if (maximumMatrix.some(row => row.some(val => val < 0))) {
+                hasError = true;
+                errorMessage += 'Maximum matrix values cannot be negative.\n';
+            }
+
+            if (allocationMatrix.some(row => row.some(val => val < 0))) {
+                hasError = true;
+                errorMessage += 'Allocation matrix values cannot be negative.\n';
+            }
+
+            // Check if allocation exceeds maximum
+            for (let i = 0; i < processCount; i++) {
+                for (let j = 0; j < resourceCount; j++) {
+                    if (allocationMatrix[i][j] > maximumMatrix[i][j]) {
+                        hasError = true;
+                        errorMessage += `Process P${i}'s allocation for Resource ${j+1} exceeds its maximum claim.\n`;
+                    }
+                }
+            }
+
+            // Check if total allocation exceeds available resources
+            for (let j = 0; j < resourceCount; j++) {
+                const totalAllocated = allocationMatrix.reduce((sum, row) => sum + row[j], 0);
+                if (totalAllocated > initialResources[j]) {
+                    hasError = true;
+                    errorMessage += `Total allocation for Resource ${j+1} exceeds initial resources.\n`;
+                }
+            }
+
+            if (hasError) {
+                alert('Error in input values:\n' + errorMessage);
+                return;
+            }
 
             // Calculate Need Matrix
             needMatrix = maximumMatrix.map((row, i) => 
@@ -562,6 +606,14 @@
                 Array.from(executedProcesses).map(i => `P${i}`).join(' → ') || 'None';
             document.getElementById('waitingProcesses').innerHTML = 
                 Array.from(waitingProcesses).map(i => `P${i}`).join(', ') || 'None';
+        }
+
+        function validateInput(input) {
+            const value = parseInt(input.value);
+            if (value < 0) {
+                alert('Negative values are not allowed!');
+                input.value = 0;
+            }
         }
     </script>
 </body>
